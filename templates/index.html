@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #d1cece;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 50px;
+            background-color: #caf0ee;
+            border-radius: 40px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #451a1a;
+        }
+
+        label {
+            font-weight: bold;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 20px;
+            box-sizing: border-box;
+            resize: none;
+        }
+
+        textarea {
+            height: 50px;
+        }
+
+        .additional-input {
+            width: 100%; /* Adjusted to accommodate delete button */
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            box-sizing: border-box;
+            resize: none;
+        }
+
+        .button {
+            background-color: #22b5d2;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            margin-top: 10px;
+            display: inline-block;
+        }
+
+        .button:hover {
+            background-color: rgb(0, 0, 0);
+        }
+
+        .delete-button {
+            background-color: #c92519;
+            color: white;
+            border: none;
+            border-radius: 15px;
+            padding: 5px 10px;
+            margin-bottom: 20px;
+            cursor: pointer;
+            display: inline-block;
+        }
+
+        .delete-button:hover {
+            background-color: #130c0c;
+        }
+
+        .form-section {
+            border-bottom: 1px solid #ccc;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+        }
+
+        .form-section h2 {
+            margin-top: 0;
+            color: #333;
+        }
+
+        /* File input styles */
+        .file-input-container {
+            position: relative;
+            margin-bottom: 10px;
+        }
+
+        .file-input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+            position: absolute;
+            z-index: -1;
+        }
+
+        .file-button {
+            background-color: #22b5d2;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            display: inline-block;
+        }
+
+        .file-button:hover {
+            background-color: #000000;
+        }
+
+        .file-name {
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            color: #555;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Submit Your Resume</h1>
+        <form id="resumeForm" action="/submit/email" method="post" enctype="multipart/form-data">
+            <div class="form-section">
+                <h2>Personal Information</h2>
+                <label for="full_name">Full Name:</label><br>
+                <input type="text" id="full_name" name="full_name"><br>
+                <label for="phone_number">Phone Number:</label><br>
+                <input type="text" id="phone_number" name="phone_number"><br>
+                <label for="email">Email Address:</label><br>
+                <input type="email" id="email" name="email"><br>
+                <label for="linkedin">LinkedIn:</label><br>
+                <input type="text" id="linkedin" name="linkedin"><br>
+                <label for="github">GitHub:</label><br>
+                <input type="text" id="github" name="github"><br>
+                <!-- File input -->
+                <div class="file-input-container">
+                    <label for="image" class="file-button">Choose Image</label>
+                    <input type="file" id="image" name="image" class="file-input" onchange="updateFileName(this)">
+                    <span class="file-name">No file chosen</span>
+                </div>
+                <!-- End of File input -->
+                <br><br>
+                <label for="objective">Objective:</label><br>
+                <textarea id="objective" name="objective"></textarea><br>
+            </div>
+            
+            <div class="form-section" id="experienceContainer">
+                <h2>Work Experience</h2>
+                <div class="experience">
+                    <label for="work_experience_years">Years of Experience:</label><br>
+                    <input type="text" name="work_experience_years[]"><br>
+                    <label for="work_experience_company">Company Name:</label><br>
+                    <input type="text" name="work_experience_company[]"><br>
+                    <label for="work_experience_description">Work Experience Description:</label><br>
+                    <textarea name="work_experience_description[]" class="additional-input"></textarea><br>
+                </div>
+                <button type="button" class="button" onclick="addExperience()">Add More Experience</button><br>
+            </div>
+
+            <div class="form-section">
+                <h2>Skills</h2>
+                <div id="skillsContainer">
+                    <div class="input-section">
+                        <textarea class="additional-input" name="skills[]"></textarea>
+                        <button type="button" class="button delete-button" onclick="this.parentElement.remove()">Delete</button>
+                    </div>
+                </div>
+                <button type="button" class="button" onclick="addInput('skillsContainer', 'skills')">Add More</button><br>
+            </div>
+
+            <div class="form-section">
+                <h2>Certifications</h2>
+                <div id="certificationsContainer">
+                    <div class="input-section">
+                        <textarea class="additional-input" name="certifications[]"></textarea>
+                        <button type="button" class="button delete-button" onclick="this.parentElement.remove()">Delete</button>
+                    </div>
+                </div>
+                <button type="button" class="button" onclick="addInput('certificationsContainer', 'certifications')">Add More</button><br>
+            </div>
+
+            <div class="form-section">
+                <h2>Projects</h2>
+                <div id="projectsContainer">
+                    <div class="input-section">
+                        <textarea class="additional-input" name="projects[]"></textarea>
+                        <button type="button" class="button delete-button" onclick="this.parentElement.remove()">Delete</button>
+                    </div>
+                </div>
+                <button type="button" class="button" onclick="addInput('projectsContainer', 'projects')">Add More</button><br>
+            </div>
+
+            <div class="form-section" id="education">
+                <h2>Education</h2>
+                <div class="education">
+                    <label for="institution_name">Institution Name:</label><br>
+                    <input type="text" id="institution_name" name="institution_name[]"><br>
+                    <label for="branch_name">Branch Name:</label><br>
+                    <input type="text" id="branch_name" name="branch_name[]"><br>
+                    <label for="start_year">Start Year:</label><br>
+                    <input type="text" id="start_year" name="start_year[]"><br>
+                    <label for="percentage">Percentage:</label><br>
+                    <input type="text" id="percentage" name="percentage[]"><br>
+                </div>
+                <button type="button" class="button" onclick="addEducation()">Add More Education</button><br>
+            </div>
+            
+            <input type="submit" class="button" id="submitButton" value="Submit">
+        </form>
+
+        <form action="/download/email" method="get" class="download-form">
+            <h2>Download User Details</h2>
+            <label for="downloadEmail">Enter Email:</label>
+            <input type="email" id="downloadEmail" name="email">
+            <input type="submit" class="button" value="Download User Details">
+        </form>
+    </div>
+
+    <script>
+        function addInput(containerId, inputName) {
+            var container = document.getElementById(containerId);
+            var inputDiv = document.createElement('div');
+            inputDiv.classList.add('input-section');
+
+            var input = document.createElement('textarea');
+            input.classList.add('additional-input');
+            input.setAttribute('name', inputName + '[]');
+
+            var deleteButton = document.createElement('button');
+            deleteButton.type = 'button';
+            deleteButton.classList.add('button', 'delete-button');
+            deleteButton.textContent = 'Delete';
+            deleteButton.onclick = function() {
+                container.removeChild(inputDiv);
+            };
+
+            inputDiv.appendChild(input);
+            inputDiv.appendChild(deleteButton);
+            container.appendChild(inputDiv);
+        }
+
+        function addExperience() {
+            var container = document.getElementById('experienceContainer');
+            var experience = document.createElement('div');
+            experience.classList.add('experience');
+
+            var yearLabel = document.createElement('label');
+            yearLabel.textContent = 'Years of Experience:';
+            var yearInput = document.createElement('input');
+            yearInput.setAttribute('type', 'text');
+            yearInput.setAttribute('name', 'work_experience_years[]');
+
+            var companyLabel = document.createElement('label');
+            companyLabel.textContent = 'Company Name:';
+            var companyInput = document.createElement('input');
+            companyInput.setAttribute('type', 'text');
+            companyInput.setAttribute('name', 'work_experience_company[]');
+
+            var descriptionLabel = document.createElement('label');
+            descriptionLabel.textContent = 'Work Experience Description:';
+            var descriptionInput = document.createElement('textarea');
+            descriptionInput.classList.add('additional-input');
+            descriptionInput.setAttribute('name', 'work_experience_description[]');
+
+            var deleteButton = document.createElement('button');
+            deleteButton.type = 'button';
+            deleteButton.classList.add('button', 'delete-button');
+            deleteButton.textContent = 'Delete';
+            deleteButton.onclick = function() {
+                container.removeChild(experience);
+            };
+
+            experience.appendChild(document.createElement('br'));
+            experience.appendChild(yearLabel);
+            experience.appendChild(document.createElement('br'));
+            experience.appendChild(yearInput);
+            experience.appendChild(document.createElement('br'));
+            experience.appendChild(companyLabel);
+            experience.appendChild(document.createElement('br'));
+            experience.appendChild(companyInput);
+            experience.appendChild(document.createElement('br'));
+            experience.appendChild(descriptionLabel);
+            experience.appendChild(document.createElement('br'));
+            experience.appendChild(descriptionInput);
+            experience.appendChild(document.createElement('br'));
+            experience.appendChild(deleteButton);
+
+            container.appendChild(experience);
+        }
+
+        function addEducation() {
+            var container = document.getElementById('education');
+            var education = document.createElement('div');
+            education.classList.add('education');
+
+            var institutionLabel = document.createElement('label');
+            institutionLabel.textContent = 'Institution Name:';
+            var institutionInput = document.createElement('input');
+            institutionInput.setAttribute('type', 'text');
+            institutionInput.setAttribute('name', 'institution_name[]');
+
+            var branchLabel = document.createElement('label');
+            branchLabel.textContent = 'Branch Name:';
+            var branchInput = document.createElement('input');
+            branchInput.setAttribute('type', 'text');
+            branchInput.setAttribute('name', 'branch_name[]');
+
+            var startYearLabel = document.createElement('label');
+            startYearLabel.textContent = 'Start Year:';
+            var startYearInput = document.createElement('input');
+            startYearInput.setAttribute('type', 'text');
+            startYearInput.setAttribute('name', 'start_year[]');
+
+            var percentageLabel = document.createElement('label');
+            percentageLabel.textContent = 'Percentage:';
+            var percentageInput = document.createElement('input');
+            percentageInput.setAttribute('type', 'text');
+            percentageInput.setAttribute('name', 'percentage[]');
+
+            var deleteButton = document.createElement('button');
+            deleteButton.type = 'button';
+            deleteButton.classList.add('button', 'delete-button');
+            deleteButton.textContent = 'Delete';
+            deleteButton.onclick = function() {
+                container.removeChild(education);
+            };
+
+            education.appendChild(document.createElement('br'));
+            education.appendChild(institutionLabel);
+            education.appendChild(document.createElement('br'));
+            education.appendChild(institutionInput);
+            education.appendChild(document.createElement('br'));
+            education.appendChild(branchLabel);
+            education.appendChild(document.createElement('br'));
+            education.appendChild(branchInput);
+            education.appendChild(document.createElement('br'));
+            education.appendChild(startYearLabel);
+            education.appendChild(document.createElement('br'));
+            education.appendChild(startYearInput);
+            education.appendChild(document.createElement('br'));
+            education.appendChild(percentageLabel);
+            education.appendChild(document.createElement('br'));
+            education.appendChild(percentageInput);
+            education.appendChild(document.createElement('br'));
+            education.appendChild(deleteButton);
+            container.appendChild(education);
+        }
+
+        function updateFileName(input) {
+            var fileName = input.files[0].name;
+            var fileNameDisplay = input.parentElement.querySelector('.file-name');
+            fileNameDisplay.textContent = fileName;
+        }
+    </script>
+</body>
+</html>
